@@ -1,0 +1,7 @@
+# Google OAuth credentials
+credentials.json
+token.pickle
+client_secret*.json
+
+#Environment variables
+.env
