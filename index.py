@@ -14,14 +14,19 @@ app = Flask(__name__)
 # Google Calendar API scope
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+CREDENTIALS_FILE = os.path.join(BASE_DIR, "credentials.json")
+TOKEN_FILE = os.path.join(BASE_DIR, "token.pickle")
+
 
 # ✅ Create REAL Google Meet link
 def create_meet_link():
     creds = None
 
     # Load saved token (so login not required every time)
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
+    if os.path.exists(TOKEN_FILE):
+        with open(TOKEN_FILE, 'rb') as token:
             creds = pickle.load(token)
 
     # If no valid credentials → login
@@ -29,16 +34,12 @@ def create_meet_link():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
             flow = InstalledAppFlow.from_client_secrets_file(
-                os.path.join(BASE_DIR, 'credentials.json'),
-                SCOPES
-            )
+            CREDENTIALS_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
 
         # Save credentials
-        with open('token.pickle', 'wb') as token:
+        with open(TOKEN_FILE, 'wb') as token:
             pickle.dump(creds, token)
 
     service = build('calendar', 'v3', credentials=creds)
